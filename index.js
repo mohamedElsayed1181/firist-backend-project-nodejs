@@ -1,18 +1,15 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const Article = require("./models/Article");
+const PORT = process.env.PORT || 3000;
+
 mongoose
-  .connect(
-    "mongodb+srv://mohamedelsayed908070:mohamedelsayed908070@cluster0.toeu3pc.mongodb.net/?appName=Cluster0",
-  )
-  .then(() => {
-    console.log("db is connected successfully ");
-  })
-  .catch((err) => {
-    console.log("error is : " + err);
-  });
-// mongodb+srv://mohamedelsayed908070:<db_password>@cluster0.toeu3pc.mongodb.net/?appName=Cluster0
+  .connect(process.env.MONGO_URI)
+  .then(() => console.log("db is connected successfully"))
+  .catch((err) => console.log("error is : " + err));
+
 app.use(express.json());
 app.get("/hellow", (req, res) => {
   res.send("hellow mohamed");
@@ -66,6 +63,6 @@ app.get("/article", async (req, res) => {
   res.json(newArticle);
 });
 
-app.listen(3000, () => {
-  console.log("server is running on port 3000");
+app.listen(PORT, () => {
+  console.log(`server is running on port ${PORT}`);
 });
