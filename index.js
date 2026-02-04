@@ -59,9 +59,44 @@ app.delete("/article/:id", async (req, res) => {
 });
 //get
 app.get("/article", async (req, res) => {
-  const newArticle = await Article.find();
-  res.json(newArticle);
+  try {
+    // 1- جلب الـ query params
+    const { search, page = 1, limit = 10 } = req.query;
+
+    // 2- ابني query ديناميكي
+    let query = {};
+
+    if (search) {
+      query.$or = [
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
+        { body: { $regex: search, $options: "i" } }
+      ];
+    }
+
+    // 3- Pagination
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+
+    // 4- جلب البيانات
+    const articles = await Article.find(query)
+      .skip(skip)
+      .limit(parseInt(limit));
+ 
+    // 5- العدد الكلي للـ frontend
+    const total = await Article.countDocuments(query);
+
+    res.json({
+      total,
+      page: parseInt(page),
+      totalPages: Math.ceil(total / parseInt(limit)),
+      articles
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
+
+
 
 app.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
