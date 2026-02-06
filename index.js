@@ -1,16 +1,18 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const app = express();
+
 const Article = require("./models/Article");
 const PORT = process.env.PORT || 3000;
-
+app.use(cors());
+app.use(express.json());
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("db is connected successfully"))
   .catch((err) => console.log("error is : " + err));
 
-app.use(express.json());
 app.get("/hellow", (req, res) => {
   res.send("hellow mohamed");
 });
@@ -70,7 +72,7 @@ app.get("/article", async (req, res) => {
       query.$or = [
         { title: { $regex: search, $options: "i" } },
         { content: { $regex: search, $options: "i" } },
-        { body: { $regex: search, $options: "i" } }
+        { body: { $regex: search, $options: "i" } },
       ];
     }
 
@@ -81,7 +83,7 @@ app.get("/article", async (req, res) => {
     const articles = await Article.find(query)
       .skip(skip)
       .limit(parseInt(limit));
- 
+
     // 5- العدد الكلي للـ frontend
     const total = await Article.countDocuments(query);
 
@@ -89,14 +91,12 @@ app.get("/article", async (req, res) => {
       total,
       page: parseInt(page),
       totalPages: Math.ceil(total / parseInt(limit)),
-      articles
+      articles,
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`server is running on port ${PORT}`);
