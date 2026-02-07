@@ -81,6 +81,7 @@ app.get("/article", async (req, res) => {
 
     // 4- جلب البيانات
     const articles = await Article.find(query)
+    .sort({ createdAt: -1 })
       .skip(skip)
       .limit(parseInt(limit));
 
